@@ -1,13 +1,15 @@
 package controllers
 
-import "github.com/astaxie/beego"
+import (
+	"github.com/astaxie/beego"
+)
 
 const (
 	aria2HttpTokenName = "ARIA2_HTTP_API_TOKEN"
 )
 
 var (
-	aria2Token = beego.AppConfig.String("security::aria2Token")
+	aria2HTTPAPIToken = beego.AppConfig.String("security::aria2HTTPAPIToken")
 )
 
 type BaseController struct {
@@ -35,13 +37,10 @@ func (b *BaseController) JsonOK(entryType string, data interface{}) {
 
 func (b *BaseController) Prepare() {
 
-	/// 获取客户端IP
-	b.Data["RemoteIP"] = b.Ctx.Input.IP()
-
 	// 获取 头部信息
 	token := b.Ctx.Input.Header(aria2HttpTokenName)
-	if token != aria2Token {
-		b.JsonError("token auth", "need token header", "")
+	if token != aria2HTTPAPIToken {
+		b.JsonError("token auth", "token header auth error", "")
 		b.StopRun()
 	}
 }

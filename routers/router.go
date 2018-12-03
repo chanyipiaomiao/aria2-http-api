@@ -7,7 +7,9 @@ import (
 
 func init() {
 	api := beego.NewNamespace("/aria2",
-		beego.NSRouter("/addUrl", &controllers.Aria2Controller{}),
+		beego.NSNamespace("/v1",
+			beego.NSRouter("/addUrl", &controllers.Aria2Controller{}),
+		),
 	)
 	beego.AddNamespace(api)
 }
