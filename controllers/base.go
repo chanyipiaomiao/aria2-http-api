@@ -12,6 +12,8 @@ var (
 	aria2HTTPAPIToken = beego.AppConfig.String("security::aria2HTTPAPIToken")
 )
 
+type Data map[string]interface{}
+
 type BaseController struct {
 	beego.Controller
 }
@@ -38,9 +40,10 @@ func (b *BaseController) JsonOK(entryType string, data interface{}) {
 func (b *BaseController) Prepare() {
 
 	// 获取 头部信息
-	token := b.Ctx.Input.Header(aria2HttpTokenName)
-	if token != aria2HTTPAPIToken {
-		b.JsonError("token auth", "token header auth error", "")
+	tokenHeader := b.Ctx.Input.Header(aria2HttpTokenName)
+	if tokenHeader != aria2HTTPAPIToken {
+		b.JsonError("token auth", "token auth error", "")
 		b.StopRun()
 	}
+
 }

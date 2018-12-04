@@ -74,7 +74,8 @@ func (a *Aria2Client) UnPause(gid string, all bool) (string, error) {
 }
 
 func (a *Aria2Client) TellStatus(gid string) (ariarpc.StatusInfo, error) {
-	return a.Client.TellStatus(gid, displayFields...)
+	//return a.Client.TellStatus(gid, displayFields...)
+	return a.Client.TellStatus(gid, "gid", "status", "totalLength", "completedLength", "downloadSpeed")
 }
 
 func (a *Aria2Client) TellActive() ([]ariarpc.StatusInfo, error) {
