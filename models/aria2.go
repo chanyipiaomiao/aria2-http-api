@@ -7,15 +7,24 @@ import (
 )
 
 var (
-	rpcurl        = beego.AppConfig.String("aria2::rpcurl")
+	aria2RPCurl   = beego.AppConfig.String("aria2::rpcurl")
 	aria2Token    = beego.AppConfig.String("aria2::token")
 	displayFields = []string{"gid", "status", "totalLength", "completedLength", "downloadSpeed"}
 )
 
 func init() {
-	if rpcurl == "" && aria2Token == "" {
+	if aria2RPCurl == "" && aria2Token == "" {
 		log.Fatalf("need rpcurl and aria2 token")
 	}
+}
+
+// Aria2Status 返回状态结果
+type Aria2Status struct {
+	GID             string
+	Status          string
+	TotalLength     string
+	CompletedLength string
+	DownloadSpeed   string
 }
 
 type Aria2Client struct {
@@ -28,7 +37,7 @@ func NewAria2Client() (*Aria2Client, error) {
 		err    error
 	)
 
-	if client, err = ariarpc.New(rpcurl, aria2Token); err != nil {
+	if client, err = ariarpc.New(aria2RPCurl, aria2Token); err != nil {
 		return nil, err
 	}
 
@@ -73,13 +82,50 @@ func (a *Aria2Client) UnPause(gid string, all bool) (string, error) {
 	return a.Client.Unpause(gid)
 }
 
-func (a *Aria2Client) TellStatus(gid string) (ariarpc.StatusInfo, error) {
-	//return a.Client.TellStatus(gid, displayFields...)
-	return a.Client.TellStatus(gid, "gid", "status", "totalLength", "completedLength", "downloadSpeed")
+func (a *Aria2Client) TellStatus(gid string) (*Aria2Status, error) {
+	var (
+		info   ariarpc.StatusInfo
+		status *Aria2Status
+		err    error
+	)
+
+	if info, err = a.Client.TellStatus(gid, displayFields...); err != nil {
+		return nil, err
+	}
+
+	status = &Aria2Status{
+		GID:             info.Gid,
+		Status:          info.Status,
+		TotalLength:     info.TotalLength,
+		CompletedLength: info.CompletedLength,
+		DownloadSpeed:   info.DownloadSpeed,
+	}
+	return status, nil
 }
 
-func (a *Aria2Client) TellActive() ([]ariarpc.StatusInfo, error) {
-	return a.Client.TellActive(displayFields...)
+func (a *Aria2Client) TellActive() ([]*Aria2Status, error) {
+	var (
+		infos  []ariarpc.StatusInfo
+		status []*Aria2Status
+		err    error
+	)
+
+	if infos, err = a.Client.TellActive(displayFields...); err != nil {
+		return nil, err
+	}
+
+	for _, info := range infos {
+		s := &Aria2Status{
+			GID:             info.Gid,
+			Status:          info.Status,
+			TotalLength:     info.TotalLength,
+			CompletedLength: info.CompletedLength,
+			DownloadSpeed:   info.DownloadSpeed,
+		}
+		status = append(status, s)
+	}
+
+	return status, nil
 }
 
 func (a *Aria2Client) TellWaiting(offset, num int) ([]ariarpc.StatusInfo, error) {

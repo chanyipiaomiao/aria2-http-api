@@ -10,6 +10,7 @@ func init() {
 		beego.NSNamespace("/v1",
 			beego.NSRouter("/addUrl", &controllers.Aria2Controller{}, "post:AddUrl"),
 			beego.NSRouter("/tellStatus", &controllers.Aria2Controller{}, "get:TellStatus"),
+			beego.NSRouter("/tellActive", &controllers.Aria2Controller{}, "get:TellActive"),
 		),
 	)
 	beego.AddNamespace(api)
