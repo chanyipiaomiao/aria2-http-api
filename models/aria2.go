@@ -20,11 +20,11 @@ func init() {
 
 // Aria2Status 返回状态结果
 type Aria2Status struct {
-	GID             string
-	Status          string
-	TotalLength     string
-	CompletedLength string
-	DownloadSpeed   string
+	GID             string `json:"gid"`
+	Status          string `json:"status"`
+	TotalLength     string `json:"totalLength"`
+	CompletedLength string `json:"completedLength"`
+	DownloadSpeed   string `json:"downloadSpeed"`
 }
 
 type Aria2Client struct {

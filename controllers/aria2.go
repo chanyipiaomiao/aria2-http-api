@@ -11,6 +11,9 @@ const (
 	AddURLToAria2Entry = "add url to aria2"
 	TellStatusEntry    = "tell gid status"
 	TellActiveEntry    = "tell active"
+	RemoveEntry        = "remove task"
+	PauseEntry         = "pause task"
+	UnPauseEntry       = "unpause task"
 )
 
 type Aria2Controller struct {
@@ -69,6 +72,7 @@ func (a *Aria2Controller) TellActive() {
 		err         error
 		aria2Client *models.Aria2Client
 		status      []*models.Aria2Status
+		result      string
 	)
 
 	if aria2Client, err = models.NewAria2Client(); err != nil {
@@ -83,5 +87,125 @@ func (a *Aria2Controller) TellActive() {
 		a.StopRun()
 	}
 
+	if status == nil || len(status) == 0 {
+		result = "not found"
+		a.JsonOK(TellActiveEntry, result)
+	}
+
 	a.JsonOK(TellActiveEntry, status)
+}
+
+func (a *Aria2Controller) Remove() {
+	var (
+		err          error
+		aria2Client  *models.Aria2Client
+		gid          string
+		forceFromGet string
+		force        bool
+	)
+
+	gid = a.GetString("gid")
+	forceFromGet = a.GetString("force")
+	if forceFromGet == "yes" {
+		force = true
+	}
+
+	if aria2Client, err = models.NewAria2Client(); err != nil {
+		log.Println(err)
+		a.JsonError(NewAria2Client, fmt.Sprintf("NewAria2Client error: %s", err), "")
+		a.StopRun()
+	}
+
+	if gid, err = aria2Client.Remove(gid, force); err != nil {
+		log.Println(err)
+		a.JsonError(RemoveEntry, fmt.Sprintf("aria2Client.Remove error: %s", err), "")
+		a.StopRun()
+	}
+	a.JsonOK(RemoveEntry, Data{"gid": gid})
+}
+
+func (a *Aria2Controller) Pause() {
+	var (
+		err          error
+		aria2Client  *models.Aria2Client
+		gid          string
+		forceFromGet string
+		force        bool
+	)
+
+	gid = a.GetString("gid")
+	forceFromGet = a.GetString("force")
+	if forceFromGet == "yes" {
+		force = true
+	}
+
+	if aria2Client, err = models.NewAria2Client(); err != nil {
+		log.Println(err)
+		a.JsonError(NewAria2Client, fmt.Sprintf("NewAria2Client error: %s", err), "")
+		a.StopRun()
+	}
+
+	if gid, err = aria2Client.Pause(gid, force); err != nil {
+		log.Println(err)
+		a.JsonError(PauseEntry, fmt.Sprintf("aria2Client.Pause error: %s", err), "")
+		a.StopRun()
+	}
+	a.JsonOK(PauseEntry, Data{"gid": gid})
+}
+
+func (a *Aria2Controller) UnPause() {
+	var (
+		err         error
+		aria2Client *models.Aria2Client
+		gid         string
+		allFromGet  string
+		all         bool
+	)
+
+	gid = a.GetString("gid")
+	allFromGet = a.GetString("all")
+	if allFromGet == "yes" {
+		all = true
+	}
+
+	if aria2Client, err = models.NewAria2Client(); err != nil {
+		log.Println(err)
+		a.JsonError(NewAria2Client, fmt.Sprintf("NewAria2Client error: %s", err), "")
+		a.StopRun()
+	}
+
+	if gid, err = aria2Client.UnPause(gid, all); err != nil {
+		log.Println(err)
+		a.JsonError(UnPauseEntry, fmt.Sprintf("aria2Client.UnPause error: %s", err), "")
+		a.StopRun()
+	}
+	a.JsonOK(UnPauseEntry, Data{"result": gid})
+}
+
+func (a *Aria2Controller) PauseAll() {
+	var (
+		err          error
+		aria2Client  *models.Aria2Client
+		forceFromGet string
+		force        bool
+		success      string
+	)
+
+	forceFromGet = a.GetString("force")
+	if forceFromGet == "yes" {
+		force = true
+	}
+
+	if aria2Client, err = models.NewAria2Client(); err != nil {
+		log.Println(err)
+		a.JsonError(NewAria2Client, fmt.Sprintf("NewAria2Client error: %s", err), "")
+		a.StopRun()
+	}
+
+	if success, err = aria2Client.PauseAll(force); err != nil {
+		log.Println(err)
+		a.JsonError(PauseEntry, fmt.Sprintf("aria2Client.PauseAll error: %s", err), "")
+		a.StopRun()
+	}
+	a.JsonOK(PauseEntry, Data{"success": success})
 }
